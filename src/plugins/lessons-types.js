@@ -1,0 +1,4 @@
+const FACETOFACE = 'FACETOFACE'
+const ONLINE = 'ONLINE'
+
+export { FACETOFACE, ONLINE }
