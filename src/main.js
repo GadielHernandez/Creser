@@ -1,17 +1,24 @@
 import Vue from 'vue'
 import App from './App.vue'
-import { auth } from './plugins/firebase'
 import vuetify from './plugins/vuetify';
 import router from './router'
 import store from './store'
 import VueYoutube from 'vue-youtube'
+import VueCookies from 'vue-cookies';
+import { auth } from './plugins/firebase'
  
 Vue.use(VueYoutube)
+
+Vue.use(VueCookies)
+Vue.$cookies.config('30d')
+
 Vue.config.productionTip = false
 
 let app
 
 auth.onAuthStateChanged(async () => {
+    await store.dispatch('user/updateLoaded', false)
+    
     if (!app) {
         app = new Vue({
             vuetify,
@@ -22,6 +29,12 @@ auth.onAuthStateChanged(async () => {
     }
     
     if(auth.currentUser){
+        const auth = await store.dispatch('user/confirmLogin')
+        if(!auth.confirmed) window.location.reload()
+        
         await store.dispatch('user/fetchProfile')
+        await store.dispatch('user/updateLoaded', true)
     }
+    else
+        await store.dispatch('user/updateLoaded', true) 
 })

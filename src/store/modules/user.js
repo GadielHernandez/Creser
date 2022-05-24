@@ -1,7 +1,9 @@
 import { auth, db } from '../../plugins/firebase'
+import AuthHelper from '../../plugins/auth'
 
 const state = {
-    profile: null
+    profile: null,
+    loaded: false
 }
 
 const getters = {}
@@ -11,15 +13,12 @@ const actions = {
         return new Promise((resolve, reject) => {
             if(auth.currentUser) return resolve({ message: 'Ya esta logueado' })
             
-            auth.signInWithEmailAndPassword(credentials.email, credentials.password)
-            .then( () => resolve({ message: 'Login exitoso' }))
-            .catch( e => {
-                if( e.code === 'auth/wrong-password' ) 
-                    return reject({ message: 'Constraseña incorrecta' })
-                if( e.code === 'auth/user-not-found' ) 
-                    return reject({ message: 'El correo no esta registrado' })
-                return reject({ message: 'Revisa los datos' })
+            AuthHelper.signIn(credentials.email, credentials.password)
+            .then( (result) => {
+                if(result.error) return reject({ message: result.error })
+                return resolve({ message: 'Login exitoso' })
             })
+            .catch( () => reject({ message: 'Revisa los datos' }) )
         })
     },
     logout(){
@@ -27,7 +26,10 @@ const actions = {
             if(!auth.currentUser) return resolve({ message: 'No esta logueado' })
 
             auth.signOut()
-            .then( () => resolve({ message: 'Logout exitoso' }) )
+            .then( () => {
+                AuthHelper.signOut()
+                return resolve({ message: 'Logout exitoso' }) 
+            })
             .catch( () => reject({ message: 'Error al cerrar sesion' }) )
         })
     },
@@ -37,9 +39,18 @@ const actions = {
             .then( async doc => {
                 const profile = doc.data()
                 commit( 'UPDATE_PROFILE', profile )
+                commit( 'UPDATE_LOADED', true )
                 return resolve()
             })
             .catch( () => reject() )
+        })
+    },
+    updateLoaded({ commit }, status){
+        commit( 'UPDATE_LOADED', status )
+    },
+    confirmLogin(){
+        return new Promise((resolve) => {
+            AuthHelper.confirmSignIn().then((result) => resolve(result))
         })
     }
 }
@@ -50,6 +61,9 @@ const mutations = {
     },
     UPDATE_COURSE(state, payload){
         state.course.data = payload
+    },
+    UPDATE_LOADED(state, status){
+        state.loaded = status
     }
 }
 

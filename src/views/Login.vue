@@ -31,7 +31,7 @@
                     <v-alert dense type="error" v-if="error" class="mt-3">
                         {{error}}
                     </v-alert>
-                    <v-btn block class="mt-12" color="primary" @click="login">
+                    <v-btn block class="mt-12" color="primary" @click="login" :loading="loading">
                         Login
                     </v-btn>
                 </v-card-text>
@@ -50,6 +50,7 @@ export default {
             email: '',
             password: '',
             error: null,
+            loading: false,
             redirects: [
                 { name: 'academia', url: 'https://academia.fuentedevida.com.mx' }
             ]
@@ -59,6 +60,7 @@ export default {
         ...mapActions({ doLogin: 'user/login' }),
         async login(){
             try {
+                this.loading = true
                 this.error = null
                 await this.doLogin({
                     email: this.email,
@@ -69,9 +71,11 @@ export default {
                 if(urlRedirect)
                     return location.href = urlRedirect.url
                 
-                // this.$router.push({ name: 'home' })
-                location.href = 'https://academia.fuentedevida.com.mx'
+                this.$router.push({ name: 'home' })
+                // location.href = 'https://academia.fuentedevida.com.mx'
+                this.loading = false
             } catch (error) {
+                this.loading = false
                 if(error.message)
                     this.error = error.message
             }
@@ -85,7 +89,6 @@ export default {
     height: 100%;
     width: 100%;
     background-image: url('~@/assets/background-login.png');
-    background-color: var(--v-secondary-base);
 }
 .center{
     width: 350px;
