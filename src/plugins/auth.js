@@ -31,7 +31,14 @@ class Auth {
             )
 
             await auth.signInWithCustomToken(authRequest.data.token)
-            Vue.$cookies.set('TOKEN_AUTH', authRequest.data.token)
+            
+            Vue.$cookies.set(
+                'TOKEN_AUTH',
+                authRequest.data.token,
+                null,
+                null,
+                '.fuentedevida.com.mx'
+            )
 
             return { message: 'success' }
         } catch (error) {
@@ -51,17 +58,18 @@ class Auth {
                 `${process.env.VUE_APP_API_BASE_URL}/auth/validToken`,
                 { idToken }
             )
-
+            
             return { confirmed: true }
         } catch (error) {
             return { confirmed: false }
         }
     }
 
-    signOut(){
-        Vue.$cookies.remove('TOKEN_AUTH')
-    }
+    async signOut() {
+        Vue.$cookies.remove('TOKEN_AUTH', null, '.fuentedevida.com.mx')
 
+        return
+    }
 }
 
 export default new Auth()

@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import { authorization } from './middlewares'
 import Login from '../views/Login'
 import Home from '../views/Home'
+import Logout from '../views/Logout'
 
 Vue.use(VueRouter)
 
@@ -18,10 +19,12 @@ const routes = [
     {
         name: 'login',
         path: '/login',
-        component: Login,
-        meta: {
-            requiresNoAuth: true
-        }
+        component: Login
+    },
+    {
+        name: 'logout',
+        path: '/logout',
+        component: Logout
     }
 ]
 

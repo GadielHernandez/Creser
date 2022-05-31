@@ -1,8 +1,8 @@
 <template>
     <div class="d-flex login ma-0">
-        <div class="ma-auto" :class="{ 'center': $vuetify.breakpoint.mdAndUp }">
-            <v-img 
-                src="@/assets/logo.png" 
+        <div class="ma-auto" :class="{ center: $vuetify.breakpoint.mdAndUp }">
+            <v-img
+                src="@/assets/logo.png"
                 width="100%"
                 max-width="90vw"
                 contain
@@ -29,9 +29,15 @@
                         solo
                     ></v-text-field>
                     <v-alert dense type="error" v-if="error" class="mt-3">
-                        {{error}}
+                        {{ error }}
                     </v-alert>
-                    <v-btn block class="mt-12" color="primary" @click="login" :loading="loading">
+                    <v-btn
+                        block
+                        class="mt-12"
+                        color="primary"
+                        @click="login"
+                        :loading="loading"
+                    >
                         Login
                     </v-btn>
                 </v-card-text>
@@ -42,6 +48,7 @@
 
 <script>
 import { mapActions } from 'vuex'
+import { auth } from '../plugins/firebase'
 
 export default {
     name: 'Login',
@@ -52,45 +59,58 @@ export default {
             error: null,
             loading: false,
             redirects: [
-                { name: 'academia', url: 'https://academia.fuentedevida.com.mx' }
-            ]
+                {
+                    name: 'academia',
+                    url: 'https://academia.fuentedevida.com.mx',
+                },
+            ],
         }
     },
     methods: {
         ...mapActions({ doLogin: 'user/login' }),
-        async login(){
+        async login() {
             try {
                 this.loading = true
                 this.error = null
                 await this.doLogin({
                     email: this.email,
-                    password: this.password
+                    password: this.password,
                 })
-                const { redirect } = this.$route.query
-                const urlRedirect = this.redirects.find( option => option.name === redirect )
-                if(urlRedirect)
-                    return location.href = urlRedirect.url
-                
+
+                this.checkRedirect()
                 this.$router.push({ name: 'home' })
                 // location.href = 'https://academia.fuentedevida.com.mx'
                 this.loading = false
             } catch (error) {
                 this.loading = false
-                if(error.message)
-                    this.error = error.message
+                if (error.message) this.error = error.message
             }
-        }
+        },
+        checkRedirect() {
+            const { redirect } = this.$route.query
+            const urlRedirect = this.redirects.find(
+                (option) => option.name === redirect
+            )
+            if (urlRedirect)  (location.href = urlRedirect.url)
+            return
+        },
     },
+    mounted(){
+        if(auth.currentUser){
+            this.checkRedirect()
+            this.$router.push({ name: 'home' })
+        }
+    }
 }
 </script>
 
 <style scoped>
-.login{
+.login {
     height: 100%;
     width: 100%;
     background-image: url('~@/assets/background-login.png');
 }
-.center{
+.center {
     width: 350px;
 }
 </style>

@@ -30,11 +30,11 @@ auth.onAuthStateChanged(async () => {
     
     if(auth.currentUser){
         const auth = await store.dispatch('user/confirmLogin')
-        if(!auth.confirmed) window.location.reload()
+        if(!auth.confirmed) return
         
         await store.dispatch('user/fetchProfile')
         await store.dispatch('user/updateLoaded', true)
     }
     else
-        await store.dispatch('user/updateLoaded', true) 
+        await store.dispatch('user/updateLoaded', true)
 })
